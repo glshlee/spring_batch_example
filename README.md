@@ -4,4 +4,4 @@
 ./gradlew build
 
 # run
-java -jar build/libs/batch-0.0.1-SNAPSHOT.jar name=hoon
+java -jar build/libs/batch-0.0.1-SNAPSHOT.jar name=hoon fileName=test.csv
