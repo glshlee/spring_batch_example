@@ -17,8 +17,10 @@ class HelloWorldJob(
     @Bean
     fun step(): Step {
         return stepBuilderFactory.get("step1")
-            .tasklet { _, _ ->
-                println("Hello, World!")
+            .tasklet { _, chunkContext ->
+                val name = chunkContext.stepContext
+                    .jobParameters["name"]
+                println("Hello, $name!")
                 RepeatStatus.FINISHED
             }
             .build()
