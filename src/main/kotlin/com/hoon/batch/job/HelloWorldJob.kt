@@ -4,7 +4,10 @@ import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
+import org.springframework.batch.core.configuration.annotation.StepScope
+import org.springframework.batch.core.step.tasklet.Tasklet
 import org.springframework.batch.repeat.RepeatStatus
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -15,14 +18,9 @@ class HelloWorldJob(
 ) {
 
     @Bean
-    fun step(): Step {
+    fun step(helloWorldTasklet: Tasklet): Step {
         return stepBuilderFactory.get("step1")
-            .tasklet { _, chunkContext ->
-                val name = chunkContext.stepContext
-                    .jobParameters["name"]
-                println("Hello, $name!")
-                RepeatStatus.FINISHED
-            }
+            .tasklet(helloWorldTasklet)
             .build()
     }
 
@@ -31,5 +29,14 @@ class HelloWorldJob(
         return jobBuilderFactory.get("job")
             .start(step)
             .build()
+    }
+
+    @StepScope
+    @Bean
+    fun helloWorldTasklet(
+        @Value("#{jobParameters['name']}") name: String
+    ) = Tasklet { _, _ ->
+        println("Hello, $name!")
+        RepeatStatus.FINISHED
     }
 }
