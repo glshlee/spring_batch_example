@@ -1,9 +1,8 @@
 package com.hoon.batch.job
 
+import com.hoon.batch.config.ExampleLogger
 import com.hoon.batch.vlidator.ParameterValidator
-import org.springframework.batch.core.Job
-import org.springframework.batch.core.JobParametersValidator
-import org.springframework.batch.core.Step
+import org.springframework.batch.core.*
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepScope
@@ -16,10 +15,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class HelloWorldJob(
+class HelloWorldBatch(
     private val jobBuilderFactory: JobBuilderFactory,
     private val stepBuilderFactory: StepBuilderFactory
 ) {
+    companion object: ExampleLogger
 
     @Bean
     fun step(helloWorldTasklet: Tasklet): Step {
@@ -29,13 +29,14 @@ class HelloWorldJob(
     }
 
     @Bean
-    fun job(
+    fun helloWorldJob(
         step: Step,
         validator: JobParametersValidator
     ): Job {
-        return jobBuilderFactory.get("job")
+        return jobBuilderFactory.get("helloWorldJob")
             .start(step)
             .validator(validator)
+            .listener(HelloWorldJobListener())
             .build()
     }
 
@@ -45,8 +46,8 @@ class HelloWorldJob(
         @Value("#{jobParameters['name']}") name: String?,
         @Value("#{jobParameters['fileName']}") fileName: String
     ) = Tasklet { _, _ ->
-        println("Hello, $name!")
-        println("fileName = $fileName")
+        log.info("Hello, $name!")
+        log.info("fileName = $fileName")
         RepeatStatus.FINISHED
     }
 
@@ -59,5 +60,15 @@ class HelloWorldJob(
         defaultJobParametersValidator.afterPropertiesSet()
 
         this.setValidators(listOf(ParameterValidator(), defaultJobParametersValidator))
+    }
+
+    class HelloWorldJobListener : JobExecutionListener {
+        override fun beforeJob(jobExecution: JobExecution) {
+            log.info("beforeJob -> ${jobExecution.jobInstance.jobName} is beginning execution")
+        }
+
+        override fun afterJob(jobExecution: JobExecution) {
+            log.info("afterJob -> ${jobExecution.jobInstance.jobName} has completed with the status ${jobExecution.status}")
+        }
     }
 }
