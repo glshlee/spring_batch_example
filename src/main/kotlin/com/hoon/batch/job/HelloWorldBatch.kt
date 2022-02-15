@@ -45,9 +45,17 @@ class HelloWorldBatch(
     fun helloWorldTasklet(
         @Value("#{jobParameters['name']}") name: String?,
         @Value("#{jobParameters['fileName']}") fileName: String
-    ) = Tasklet { _, _ ->
+    ) = Tasklet { _, context ->
         log.info("Hello, $name!")
         log.info("fileName = $fileName")
+
+        val jobContext = context.stepContext
+            .stepExecution
+            .jobExecution
+            .executionContext
+
+        jobContext.put("user.name", name)
+
         RepeatStatus.FINISHED
     }
 
