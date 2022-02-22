@@ -5,12 +5,11 @@ import com.hoon.batch.vlidator.ParameterValidator
 import org.springframework.batch.core.*
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
-import org.springframework.batch.core.configuration.annotation.StepScope
 import org.springframework.batch.core.job.CompositeJobParametersValidator
 import org.springframework.batch.core.job.DefaultJobParametersValidator
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener
 import org.springframework.batch.core.step.tasklet.Tasklet
 import org.springframework.batch.repeat.RepeatStatus
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -19,42 +18,64 @@ class HelloWorldBatch(
     private val jobBuilderFactory: JobBuilderFactory,
     private val stepBuilderFactory: StepBuilderFactory
 ) {
-    companion object: ExampleLogger
-
-    @Bean
-    fun step(helloWorldTasklet: Tasklet): Step {
-        return stepBuilderFactory.get("step1")
-            .tasklet(helloWorldTasklet)
-            .build()
-    }
+    companion object : ExampleLogger
 
     @Bean
     fun helloWorldJob(
-        step: Step,
+        step1: Step,
+        step2: Step,
         validator: JobParametersValidator
     ): Job {
         return jobBuilderFactory.get("helloWorldJob")
-            .start(step)
+            .start(step1)
+            .next(step2)
             .validator(validator)
             .listener(HelloWorldJobListener())
             .build()
     }
 
-    @StepScope
     @Bean
-    fun helloWorldTasklet(
-        @Value("#{jobParameters['name']}") name: String?,
-        @Value("#{jobParameters['fileName']}") fileName: String
-    ) = Tasklet { _, context ->
-        log.info("Hello, $name!")
-        log.info("fileName = $fileName")
+    fun step1(
+        helloWorldTasklet: Tasklet,
+        promotionListener: StepExecutionListener
+    ): Step {
+        return stepBuilderFactory.get("step1")
+            .tasklet(helloWorldTasklet)
+            .listener(promotionListener)
+            .build()
+    }
 
-        val jobContext = context.stepContext
+    @Bean
+    fun step2(helloWorldTasklet: Tasklet): Step {
+        return stepBuilderFactory.get("step2")
+            .tasklet(goodByeTasklet())
+            .build()
+    }
+
+    @Bean
+    fun helloWorldTasklet() = Tasklet { _, context ->
+        val parameters = context.stepContext
+            .jobParameters
+        log.info("Hello, ${parameters["name"]}!")
+        log.info("fileName = ${parameters["fileName"]}")
+        log.info("promotion_test = ${parameters["test"]}")
+
+        val stepContext = context.stepContext
             .stepExecution
-            .jobExecution
             .executionContext
 
-        jobContext.put("user.name", name)
+        stepContext.put("promotion_test", "step context promotion")
+
+        RepeatStatus.FINISHED
+    }
+
+    @Bean
+    fun goodByeTasklet() = Tasklet { contribution, chunkContext ->
+        val parameters = chunkContext.stepContext
+            .jobParameters
+        log.info("Hello, ${parameters["name"]}!")
+        log.info("fileName = ${parameters["fileName"]}")
+        log.info("promotionTest= ${chunkContext.stepContext.stepExecution.jobExecution.executionContext["promotion_test"]}")
 
         RepeatStatus.FINISHED
     }
@@ -63,11 +84,18 @@ class HelloWorldBatch(
     fun validator() = CompositeJobParametersValidator().apply {
         val defaultJobParametersValidator = DefaultJobParametersValidator().apply {
             this.setRequiredKeys(arrayOf("fileName"))
-            this.setOptionalKeys(arrayOf("name"))
+            this.setOptionalKeys(arrayOf("name", "random"))
         }
         defaultJobParametersValidator.afterPropertiesSet()
 
         this.setValidators(listOf(ParameterValidator(), defaultJobParametersValidator))
+    }
+
+    @Bean
+    fun promotionListener(): StepExecutionListener {
+        val listener = ExecutionContextPromotionListener()
+        listener.setKeys(arrayOf("promotion_test"))
+        return listener
     }
 
     class HelloWorldJobListener : JobExecutionListener {
