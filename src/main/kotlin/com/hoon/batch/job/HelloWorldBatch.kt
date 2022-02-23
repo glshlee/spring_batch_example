@@ -30,7 +30,7 @@ class HelloWorldBatch(
             .start(step1)
             .next(step2)
             .validator(validator)
-            .listener(HelloWorldJobListener())
+            .listener(helloWorldJobListener())
             .build()
     }
 
@@ -38,19 +38,15 @@ class HelloWorldBatch(
     fun step1(
         helloWorldTasklet: Tasklet,
         promotionListener: StepExecutionListener
-    ): Step {
-        return stepBuilderFactory.get("step1")
-            .tasklet(helloWorldTasklet)
-            .listener(promotionListener)
-            .build()
-    }
+    ) = stepBuilderFactory.get("step1")
+        .tasklet(helloWorldTasklet)
+        .listener(promotionListener)
+        .build()
 
     @Bean
-    fun step2(helloWorldTasklet: Tasklet): Step {
-        return stepBuilderFactory.get("step2")
-            .tasklet(goodByeTasklet())
-            .build()
-    }
+    fun step2(goodByeTasklet: Tasklet) = stepBuilderFactory.get("step2")
+        .tasklet(goodByeTasklet)
+        .build()
 
     @Bean
     fun helloWorldTasklet() = Tasklet { _, context ->
@@ -98,7 +94,7 @@ class HelloWorldBatch(
         return listener
     }
 
-    class HelloWorldJobListener : JobExecutionListener {
+    private fun helloWorldJobListener() = object : JobExecutionListener {
         override fun beforeJob(jobExecution: JobExecution) {
             log.info("beforeJob -> ${jobExecution.jobInstance.jobName} is beginning execution")
         }
