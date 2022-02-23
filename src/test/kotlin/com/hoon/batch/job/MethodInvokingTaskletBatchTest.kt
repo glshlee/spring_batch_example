@@ -18,6 +18,7 @@ class MethodInvokingTaskletBatchTest @Autowired constructor(
     @Test
     fun `성공`() {
         val jobParameters = jobLauncherTestUtils.uniqueJobParametersBuilder
+            .addString("name", "hoon")
             .toJobParameters()
         val jobExecution = jobLauncherTestUtils.launchJob(jobParameters)
 
