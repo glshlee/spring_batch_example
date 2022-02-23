@@ -21,8 +21,11 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	runtimeOnly("com.h2database:h2")
+	
+	// for test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.batch:spring-batch-test")
+	testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
 }
 
 tasks.withType<KotlinCompile> {
