@@ -9,7 +9,7 @@ import org.springframework.batch.test.context.SpringBatchTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 
-@ContextConfiguration(classes = [BatchTestConfig::class, CallableTaskletBatch::class])
+@ContextConfiguration(classes = [BatchTestConfig::class, CallableTaskletBatchConfiguration::class])
 @SpringBatchTest
 class CallableTaskletBatchTest @Autowired constructor(
     val jobLauncherTestUtils: JobLauncherTestUtils
