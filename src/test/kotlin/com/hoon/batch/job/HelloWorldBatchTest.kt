@@ -9,7 +9,7 @@ import org.springframework.batch.test.context.SpringBatchTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 
-@ContextConfiguration(classes = [BatchTestConfig::class, HelloWorldBatch::class])
+@ContextConfiguration(classes = [BatchTestConfig::class, HelloWorldBatchConfiguration::class])
 @SpringBatchTest
 class HelloWorldBatchTest @Autowired constructor(
     val jobLauncherTestUtils: JobLauncherTestUtils

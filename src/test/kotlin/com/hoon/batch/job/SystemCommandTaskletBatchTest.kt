@@ -9,14 +9,14 @@ import org.springframework.batch.test.context.SpringBatchTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 
-@ContextConfiguration(classes = [BatchTestConfig::class, CallableTaskletBatchConfiguration::class])
+@ContextConfiguration(classes = [BatchTestConfig::class, SystemCommandTaskletBatchConfiguration::class])
 @SpringBatchTest
-class CallableTaskletBatchTest @Autowired constructor(
+class SystemCommandTaskletBatchTest @Autowired constructor(
     val jobLauncherTestUtils: JobLauncherTestUtils
 ) {
 
     @Test
-    fun `CallableTaskletBatch 성공`() {
+    fun `SystemCommandTaskletBatch 성공`() {
         val jobParameters = jobLauncherTestUtils.uniqueJobParametersBuilder
             .toJobParameters()
         val jobExecution = jobLauncherTestUtils.launchJob(jobParameters)
