@@ -18,7 +18,7 @@ class ChunkBasedBatchTest @Autowired constructor(
 ) {
 
     @Test
-    fun `CunkBasedBatch 성공`() {
+    fun `ChunkBasedBatch 성공`() {
         val jobParameters = jobLauncherTestUtils.uniqueJobParametersBuilder
             .toJobParameters()
         val jobExecution = jobLauncherTestUtils.launchJob(jobParameters)
