@@ -26,7 +26,7 @@ class ConditionalBatchConfiguration(
         exitStatusDecider: JobExecutionDecider
     ) = jobBuilderFactory.get("conditionalJob")
         .start(divideStep).on("*").to(exitStatusDecider)
-        .from(exitStatusDecider).on("FAILED").to((failureStep))
+        .from(exitStatusDecider).on("FAILED").to((failureStep)).on("*").fail()
         .from(exitStatusDecider).on("*").to(successStep)
         .end()
         .build()

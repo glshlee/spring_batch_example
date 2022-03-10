@@ -34,6 +34,6 @@ class ConditionalBatchTest @Autowired constructor(
         val jobExecution = jobLauncherTestUtils.launchJob(jobParameters)
 
         jobExecution.stepExecutions.any { it.exitStatus.exitCode.equals(ExitStatus.FAILED.exitCode) } shouldBe true
-        jobExecution.exitStatus shouldBe ExitStatus.COMPLETED
+        jobExecution.exitStatus shouldBe ExitStatus.FAILED
     }
 }
