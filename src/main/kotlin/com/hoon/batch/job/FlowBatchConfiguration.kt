@@ -16,14 +16,23 @@ class FlowBatchConfiguration(
     private val stepBuilderFactory: StepBuilderFactory
 ) {
 
+//    @Bean
+//    fun conditionalStepLogicJob(
+//        preProcessingFlow: Flow,
+//        runBatch: Step
+//    ) = jobBuilderFactory.get("conditionalStepLogicJob")
+//        .start(preProcessingFlow)
+//        .next(runBatch)
+//        .end()
+//        .build()
+
     @Bean
     fun conditionalStepLogicJob(
-        preProcessingFlow: Flow,
+        initializeBatch: Step,
         runBatch: Step
     ) = jobBuilderFactory.get("conditionalStepLogicJob")
-        .start(preProcessingFlow)
+        .start(initializeBatch)
         .next(runBatch)
-        .end()
         .build()
 
     @Bean
@@ -35,6 +44,13 @@ class FlowBatchConfiguration(
         .start(loadFileStep)
         .next(loadCustomerStep)
         .next(updateStartStep)
+        .build()
+
+    @Bean
+    fun initializeBatch(
+        preProcessingFlow: Flow
+    ) = stepBuilderFactory.get("initializeBatch")
+        .flow(preProcessingFlow)
         .build()
 
     @Bean
